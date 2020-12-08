@@ -60,7 +60,7 @@ class Down(nn.Module):
         self.ca = ChannelAttention(out_planes)
         self.sa = SpatialAttention()
 
-    def forword(self, x):
+    def forward(self, x):
         out = self.conv_b(self.conv_a(x))
         out = self.ca(out) * out
         out = self.sa(out) * out

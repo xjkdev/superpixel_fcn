@@ -78,7 +78,8 @@ def deconv(in_planes, out_planes):
 def migrate_state_dict(state_dict):
     result = collections.OrderedDict()
     for key in state_dict:
-        if m := re.match(r'conv(\d)([ab])\.([01])\.([a-z_]+)', key):
+        m = re.match(r'conv(\d)([ab])\.([01])\.([a-z_]+)', key)
+        if m:
             newkey = 'down{0}.conv_{1}.{2}.{3}'.format(*m.groups())
             print(key, '->', newkey)
             result[newkey] = state_dict[key]

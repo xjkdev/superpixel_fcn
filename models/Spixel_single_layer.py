@@ -6,7 +6,8 @@ from train_util import *
 
 # define the function includes in import *
 __all__ = [
-    'SpixelNet1l', 'SpixelNet1l_bn'
+    'SpixelNet1l', 'SpixelNet1l_bn',
+    'SpixelNet1l_CBAM', 'SpixelNet1l_CBAM_bn'
 ]
 
 

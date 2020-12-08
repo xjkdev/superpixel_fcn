@@ -1,4 +1,5 @@
 import argparse
+from models import model_util
 import os
 import shutil
 import time
@@ -19,12 +20,11 @@ from tensorboardX import SummaryWriter
 from train_util import *
 
 '''
-Main code for training 
+Main code for training
 
-author: Fengting 
+author: Fengting
 Last modification: March 8th, 2019
 '''
-
 
 
 model_names = sorted(name for name in models.__dict__
@@ -36,46 +36,169 @@ parser = argparse.ArgumentParser(description='PyTorch SpixelFCN Training on BSDS
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 # ================ training setting ====================
-parser.add_argument('--dataset', metavar='DATASET', default='BSD500',  choices=dataset_names,
-                    help='dataset type : ' +  ' | '.join(dataset_names))
-parser.add_argument('--arch', '-a', metavar='ARCH', default='SpixelNet1l_bn',  help='model architecture')
-parser.add_argument('--data', metavar='DIR',default='', help='path to input dataset')
-parser.add_argument('--savepath',default='', help='path to save ckpt')
+parser.add_argument('--dataset', metavar='DATASET', default='BSD500', choices=dataset_names,
+                    help='dataset type : ' + ' | '.join(dataset_names))
+parser.add_argument(
+    '--arch',
+    '-a',
+    metavar='ARCH',
+    default='SpixelNet1l_bn',
+    help='model architecture')
+parser.add_argument(
+    '--data',
+    metavar='DIR',
+    default='',
+    help='path to input dataset')
+parser.add_argument('--savepath', default='', help='path to save ckpt')
 
 
-parser.add_argument('--train_img_height', '-t_imgH', default=208,  type=int, help='img height')
-parser.add_argument('--train_img_width', '-t_imgW', default=208, type=int, help='img width')
-parser.add_argument('--input_img_height', '-v_imgH', default=320, type=int, help='img height_must be 16*n')  #
-parser.add_argument('--input_img_width', '-v_imgW', default=320,  type=int, help='img width must be 16*n')
+parser.add_argument(
+    '--train_img_height',
+    '-t_imgH',
+    default=208,
+    type=int,
+    help='img height')
+parser.add_argument(
+    '--train_img_width',
+    '-t_imgW',
+    default=208,
+    type=int,
+    help='img width')
+parser.add_argument(
+    '--input_img_height',
+    '-v_imgH',
+    default=320,
+    type=int,
+    help='img height_must be 16*n')  #
+parser.add_argument(
+    '--input_img_width',
+    '-v_imgW',
+    default=320,
+    type=int,
+    help='img width must be 16*n')
 
 # ======== learning schedule ================
-parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',help='number of data loading workers')
-parser.add_argument('--epochs', default=3000000, type=int, metavar='N', help='number of total epoches, make it big enough to follow the iteration maxmium')
-parser.add_argument('--start_epoch', default=0, type=int, metavar='N',  help='manual epoch number (useful on restarts)')
-parser.add_argument('--epoch_size', default= 6000,  help='choose any value > 408 to use all the train and val data')
-parser.add_argument('-b', '--batch-size', default=4, type=int,   metavar='N', help='mini-batch size')
+parser.add_argument(
+    '-j',
+    '--workers',
+    default=4,
+    type=int,
+    metavar='N',
+    help='number of data loading workers')
+parser.add_argument(
+    '--epochs',
+    default=3000000,
+    type=int,
+    metavar='N',
+    help='number of total epoches, make it big enough to follow the iteration maxmium')
+parser.add_argument(
+    '--start_epoch',
+    default=0,
+    type=int,
+    metavar='N',
+    help='manual epoch number (useful on restarts)')
+parser.add_argument(
+    '--epoch_size',
+    default=6000,
+    help='choose any value > 408 to use all the train and val data')
+parser.add_argument(
+    '-b',
+    '--batch-size',
+    default=4,
+    type=int,
+    metavar='N',
+    help='mini-batch size')
 
-parser.add_argument('--solver', default='adam',choices=['adam','sgd'], help='solver algorithms, we use adam')
-parser.add_argument('--lr', '--learning-rate', default=0.00005, type=float,metavar='LR', help='initial learning rate')
-parser.add_argument('--momentum', default=0.9, type=float, metavar='M',  help='momentum for sgd, alpha parameter for adam')
-parser.add_argument('--beta', default=0.999, type=float, metavar='M',   help='beta parameter for adam')
-parser.add_argument('--weight_decay', '--wd', default=4e-4, type=float, metavar='W', help='weight decay')
-parser.add_argument('--bias_decay', default=0, type=float, metavar='B', help='bias decay, we never use it')
-parser.add_argument('--milestones', default=[200000], metavar='N', nargs='*', help='epochs at which learning rate is divided by 2')
-parser.add_argument('--additional_step', default= 100000, help='the additional iteration, after lr decay')
+parser.add_argument(
+    '--solver',
+    default='adam',
+    choices=[
+        'adam',
+        'sgd'],
+    help='solver algorithms, we use adam')
+parser.add_argument(
+    '--lr',
+    '--learning-rate',
+    default=0.00005,
+    type=float,
+    metavar='LR',
+    help='initial learning rate')
+parser.add_argument(
+    '--momentum',
+    default=0.9,
+    type=float,
+    metavar='M',
+    help='momentum for sgd, alpha parameter for adam')
+parser.add_argument(
+    '--beta',
+    default=0.999,
+    type=float,
+    metavar='M',
+    help='beta parameter for adam')
+parser.add_argument(
+    '--weight_decay',
+    '--wd',
+    default=4e-4,
+    type=float,
+    metavar='W',
+    help='weight decay')
+parser.add_argument(
+    '--bias_decay',
+    default=0,
+    type=float,
+    metavar='B',
+    help='bias decay, we never use it')
+parser.add_argument(
+    '--milestones',
+    default=[200000],
+    metavar='N',
+    nargs='*',
+    help='epochs at which learning rate is divided by 2')
+parser.add_argument(
+    '--additional_step',
+    default=100000,
+    help='the additional iteration, after lr decay')
 
 # ============== hyper-param ====================
-parser.add_argument('--pos_weight', '-p_w', default=0.003, type=float, help='weight of the pos term')
-parser.add_argument('--downsize', default=16, type=float,help='grid cell size for superpixel training ')
+parser.add_argument(
+    '--pos_weight',
+    '-p_w',
+    default=0.003,
+    type=float,
+    help='weight of the pos term')
+parser.add_argument('--downsize', default=16, type=float,
+                    help='grid cell size for superpixel training ')
 
 # ================= other setting ===================
-parser.add_argument('--gpu', default= '0', type=str, help='gpu id')
-parser.add_argument('--print_freq', '-p', default=10, type=int,  help='print frequency (step)')
-parser.add_argument('--record_freq', '-rf', default=5, type=int,  help='record frequency (epoch)')
-parser.add_argument('--label_factor', default=5, type=int, help='constant multiplied to label index for viz.')
-parser.add_argument('--pretrained', dest='pretrained', default=None, help='path to pre-trained model')
-parser.add_argument('--no-date', action='store_true',  help='don\'t append date timestamp to folder' )
-
+parser.add_argument('--gpu', default='0', type=str, help='gpu id')
+parser.add_argument(
+    '--print_freq',
+    '-p',
+    default=10,
+    type=int,
+    help='print frequency (step)')
+parser.add_argument(
+    '--record_freq',
+    '-rf',
+    default=5,
+    type=int,
+    help='record frequency (epoch)')
+parser.add_argument('--label_factor', default=5, type=int,
+                    help='constant multiplied to label index for viz.')
+parser.add_argument(
+    '--pretrained',
+    dest='pretrained',
+    default=None,
+    help='path to pre-trained model')
+parser.add_argument(
+    '--migration',
+    dest='migration',
+    default=False,
+    help='is pretrained migration')
+parser.add_argument(
+    '--no-date',
+    action='store_true',
+    help='don\'t append date timestamp to folder')
 
 
 best_EPE = -1
@@ -99,7 +222,7 @@ def main():
         args.arch,
         args.solver,
         args.epochs,
-        '_epochSize'+str(args.epoch_size) if args.epoch_size > 0 else '',
+        '_epochSize' + str(args.epoch_size) if args.epoch_size > 0 else '',
         args.batch_size,
         args.lr,
         args.pos_weight,
@@ -108,13 +231,14 @@ def main():
         timestamp = datetime.datetime.now().strftime("%y_%m_%d_%H_%M")
     else:
         timestamp = ''
-    save_path = os.path.abspath(args.savepath) + '/' + os.path.join(args.dataset, save_path  +  '_' + timestamp )
+    save_path = os.path.abspath(
+        args.savepath) + '/' + os.path.join(args.dataset, save_path + '_' + timestamp)
 
     # ==========  Data loading code ==============
     input_transform = transforms.Compose([
         flow_transforms.ArrayToTensor(),
-        transforms.Normalize(mean=[0,0,0], std=[255,255,255]),
-        transforms.Normalize(mean=[0.411,0.432,0.45], std=[1,1,1])
+        transforms.Normalize(mean=[0, 0, 0], std=[255, 255, 255]),
+        transforms.Normalize(mean=[0.411, 0.432, 0.45], std=[1, 1, 1])
     ])
 
     val_input_transform = transforms.Compose([
@@ -128,22 +252,23 @@ def main():
     ])
 
     co_transform = flow_transforms.Compose([
-            flow_transforms.RandomCrop((args.train_img_height ,args.train_img_width)),
-            flow_transforms.RandomVerticalFlip(),
-            flow_transforms.RandomHorizontalFlip()
-        ])
+        flow_transforms.RandomCrop(
+            (args.train_img_height, args.train_img_width)),
+        flow_transforms.RandomVerticalFlip(),
+        flow_transforms.RandomHorizontalFlip()
+    ])
 
     print("=> loading img pairs from '{}'".format(args.data))
     train_set, val_set = datasets.__dict__[args.dataset](
         args.data,
         transform=input_transform,
-        val_transform = val_input_transform,
+        val_transform=val_input_transform,
         target_transform=target_transform,
         co_transform=co_transform
     )
-    print('{} samples found, {} train samples and {} val samples '.format(len(val_set)+len(train_set),
-                                                                           len(train_set),
-                                                                           len(val_set)))
+    print('{} samples found, {} train samples and {} val samples '.format(len(val_set) + len(train_set),
+                                                                          len(train_set),
+                                                                          len(val_set)))
     train_loader = torch.utils.data.DataLoader(
         train_set, batch_size=args.batch_size,
         num_workers=args.workers, pin_memory=True, shuffle=True, drop_last=True)
@@ -156,16 +281,19 @@ def main():
     if args.pretrained:
         network_data = torch.load(args.pretrained)
         args.arch = network_data['arch']
+        if args.migration:
+            network_data['state_dict'] = model_util.migrate_state_dict(
+                network_data['state_dict'])
         print("=> using pre-trained model '{}'".format(args.arch))
     else:
         network_data = None
         print("=> creating model '{}'".format(args.arch))
 
-    model = models.__dict__[args.arch]( data = network_data).cuda()
+    model = models.__dict__[args.arch](data=network_data).cuda()
     model = torch.nn.DataParallel(model).cuda()
     cudnn.benchmark = True
 
-    #=========== creat optimizer, we use adam by default ==================
+    # =========== creat optimizer, we use adam by default ==================
     assert(args.solver in ['adam', 'sgd'])
     print('=> setting {} solver'.format(args.solver))
     param_groups = [{'params': model.module.bias_parameters(), 'weight_decay': args.bias_decay},
@@ -179,7 +307,7 @@ def main():
 
     # for continues training
     if args.pretrained and ('dataset' in network_data):
-        if args.pretrained and args.dataset == network_data['dataset'] :
+        if args.pretrained and args.dataset == network_data['dataset']:
             optimizer.load_state_dict(network_data['optimizer'])
             best_EPE = network_data['best_EPE']
             args.start_epoch = network_data['epoch']
@@ -195,33 +323,37 @@ def main():
     # spixelID: superpixel ID for visualization,
     # XY_feat: the coordinate feature for position loss term
     spixelID, XY_feat_stack = init_spixel_grid(args)
-    val_spixelID,  val_XY_feat_stack = init_spixel_grid(args, b_train=False)
-
+    val_spixelID, val_XY_feat_stack = init_spixel_grid(args, b_train=False)
 
     for epoch in range(args.start_epoch, args.epochs):
         # train for one epoch
         train_avg_slic, train_avg_sem, iteration = train(train_loader, model, optimizer, epoch,
-                                                         train_writer, spixelID, XY_feat_stack )
+                                                         train_writer, spixelID, XY_feat_stack)
         if epoch % args.record_freq == 0:
             train_writer.add_scalar('Mean avg_slic', train_avg_slic, epoch)
 
         # evaluate on validation set and save the module( and choose the best)
         with torch.no_grad():
-            avg_slic, avg_sem  = validate(val_loader, model, epoch, val_writer, val_spixelID, val_XY_feat_stack)
+            avg_slic, avg_sem = validate(
+                val_loader, model, epoch, val_writer, val_spixelID, val_XY_feat_stack)
             if epoch % args.record_freq == 0:
                 val_writer.add_scalar('Mean avg_slic', avg_slic, epoch)
 
         rec_dict = {
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'state_dict': model.module.state_dict(),
-                'best_EPE': best_EPE,
-                'optimizer': optimizer.state_dict(),
-                'dataset': args.dataset
-            }
+            'epoch': epoch + 1,
+            'arch': args.arch,
+            'state_dict': model.module.state_dict(),
+            'best_EPE': best_EPE,
+            'optimizer': optimizer.state_dict(),
+            'dataset': args.dataset
+        }
 
         if (iteration) >= (args.milestones[-1] + args.additional_step):
-            save_checkpoint(rec_dict, is_best =False, filename='%d_step.tar' % iteration)
+            save_checkpoint(
+                rec_dict,
+                is_best=False,
+                filename='%d_step.tar' %
+                iteration)
             print("Train finished!")
             break
 
@@ -232,7 +364,8 @@ def main():
         save_checkpoint(rec_dict, is_best)
 
 
-def train(train_loader, model, optimizer, epoch, train_writer, init_spixl_map_idx, xy_feat):
+def train(train_loader, model, optimizer, epoch,
+          train_writer, init_spixl_map_idx, xy_feat):
     global n_iter, args, intrinsic
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -241,7 +374,8 @@ def train(train_loader, model, optimizer, epoch, train_writer, init_spixl_map_id
     losses_sem = AverageMeter()
     losses_pos = AverageMeter()
 
-    epoch_size =  len(train_loader) if args.epoch_size == 0 else min(len(train_loader), args.epoch_size)
+    epoch_size = len(train_loader) if args.epoch_size == 0 else min(
+        len(train_loader), args.epoch_size)
 
     # switch to train mode
     model.train()
@@ -256,21 +390,23 @@ def train(train_loader, model, optimizer, epoch, train_writer, init_spixl_map_id
         if (iteration + 1) in args.milestones:
             state_dict = optimizer.state_dict()
             for param_group in state_dict['param_groups']:
-                param_group['lr'] = args.lr * ((0.5) ** (args.milestones.index(iteration + 1) + 1))
+                param_group['lr'] = args.lr * \
+                    ((0.5) ** (args.milestones.index(iteration + 1) + 1))
             optimizer.load_state_dict(state_dict)
 
         # ========== complete data loading ================
-        label_1hot = label2one_hot_torch(label.to(device), C=50) # set C=50 as SSN does
+        label_1hot = label2one_hot_torch(
+            label.to(device), C=50)  # set C=50 as SSN does
         input_gpu = input.to(device)
-        LABXY_feat_tensor = build_LABXY_feat(label_1hot, xy_feat)  # B* (50+2 )* H * W
+        LABXY_feat_tensor = build_LABXY_feat(
+            label_1hot, xy_feat)  # B* (50+2 )* H * W
         torch.cuda.synchronize()
         data_time.update(time.time() - end)
 
-
         # ========== predict association map ============
         output = model(input_gpu)
-        slic_loss, loss_sem, loss_pos = compute_semantic_pos_loss( output, LABXY_feat_tensor,
-                                                                pos_weight= args.pos_weight, kernel_size=args.downsize)
+        slic_loss, loss_sem, loss_pos = compute_semantic_pos_loss(output, LABXY_feat_tensor,
+                                                                  pos_weight=args.pos_weight, kernel_size=args.downsize)
 
         # ========= back propagate ===============
         optimizer.zero_grad()
@@ -292,8 +428,14 @@ def train(train_loader, model, optimizer, epoch, train_writer, init_spixl_map_id
             print('train Epoch: [{0}][{1}/{2}]\t Time {3}\t Data {4}\t Total_loss {5}\t Loss_sem {6}\t Loss_pos {7}\t'
                   .format(epoch, i, epoch_size, batch_time, data_time, total_loss, losses_sem, losses_pos))
 
-            train_writer.add_scalar('Train_loss', slic_loss.item(), i + epoch*epoch_size)
-            train_writer.add_scalar('learning rate',optimizer.param_groups[0]['lr'], i + epoch * epoch_size)
+            train_writer.add_scalar(
+                'Train_loss',
+                slic_loss.item(),
+                i + epoch * epoch_size)
+            train_writer.add_scalar(
+                'learning rate',
+                optimizer.param_groups[0]['lr'],
+                i + epoch * epoch_size)
 
         n_iter += 1
         if i >= epoch_size:
@@ -304,36 +446,44 @@ def train(train_loader, model, optimizer, epoch, train_writer, init_spixl_map_id
 
     # =========== write information to tensorboard ===========
     if epoch % args.record_freq == 0:
-        train_writer.add_scalar('Train_loss_epoch', slic_loss.item(),  epoch )
-        train_writer.add_scalar('loss_sem',  loss_sem.item(),  epoch )
-        train_writer.add_scalar('loss_pos',  loss_pos.item(), epoch)
+        train_writer.add_scalar('Train_loss_epoch', slic_loss.item(), epoch)
+        train_writer.add_scalar('loss_sem', loss_sem.item(), epoch)
+        train_writer.add_scalar('loss_pos', loss_pos.item(), epoch)
 
-        #save image
-        mean_values = torch.tensor([0.411, 0.432, 0.45], dtype=input_gpu.dtype).view(3, 1, 1)
-        input_l_save = (make_grid((input + mean_values).clamp(0, 1), nrow=args.batch_size))
+        # save image
+        mean_values = torch.tensor(
+            [0.411, 0.432, 0.45], dtype=input_gpu.dtype).view(3, 1, 1)
+        input_l_save = (
+            make_grid(
+                (input +
+                 mean_values).clamp(
+                    0,
+                    1),
+                nrow=args.batch_size))
         label_save = make_grid(args.label_factor * label)
 
         train_writer.add_image('Input', input_l_save, epoch)
         train_writer.add_image('label', label_save, epoch)
 
-        curr_spixl_map = update_spixl_map(init_spixl_map_idx,output)
-        spixel_lab_save = make_grid(curr_spixl_map, nrow=args.batch_size)[0, :, :]
+        curr_spixl_map = update_spixl_map(init_spixl_map_idx, output)
+        spixel_lab_save = make_grid(
+            curr_spixl_map, nrow=args.batch_size)[0, :, :]
         spixel_viz, _ = get_spixel_image(input_l_save, spixel_lab_save)
         train_writer.add_image('Spixel viz', spixel_viz, epoch)
 
-        #save associ map,  --- for debug only
+        # save associ map,  --- for debug only
         # _, prob_idx = torch.max(output, dim=1, keepdim=True)
         # prob_map_save = make_grid(assign2uint8(prob_idx))
         # train_writer.add_image('assigment idx', prob_map_save, epoch)
 
         print('==> write train step %dth to tensorboard' % i)
 
-
     return total_loss.avg, losses_sem.avg, iteration
 
 
-def validate(val_loader, model, epoch, val_writer, init_spixl_map_idx, xy_feat):
-    global n_iter,   args,    intrinsic
+def validate(val_loader, model, epoch, val_writer,
+             init_spixl_map_idx, xy_feat):
+    global n_iter, args, intrinsic
     batch_time = AverageMeter()
     data_time = AverageMeter()
 
@@ -341,7 +491,8 @@ def validate(val_loader, model, epoch, val_writer, init_spixl_map_idx, xy_feat):
     losses_sem = AverageMeter()
     losses_pos = AverageMeter()
 
-    # set the validation epoch-size, we only randomly val. 400 batches during training to save time
+    # set the validation epoch-size, we only randomly val. 400 batches during
+    # training to save time
     epoch_size = min(len(val_loader), 400)
 
     # switch to train mode
@@ -353,7 +504,8 @@ def validate(val_loader, model, epoch, val_writer, init_spixl_map_idx, xy_feat):
         # measure data loading time
         label_1hot = label2one_hot_torch(label.to(device), C=50)
         input_gpu = input.to(device)
-        LABXY_feat_tensor = build_LABXY_feat(label_1hot, xy_feat)  # B* 50+2 * H * W
+        LABXY_feat_tensor = build_LABXY_feat(
+            label_1hot, xy_feat)  # B* 50+2 * H * W
         torch.cuda.synchronize()
         data_time.update(time.time() - end)
 
@@ -361,7 +513,7 @@ def validate(val_loader, model, epoch, val_writer, init_spixl_map_idx, xy_feat):
         with torch.no_grad():
             output = model(input_gpu)
             slic_loss, loss_sem, loss_pos = compute_semantic_pos_loss(output, LABXY_feat_tensor,
-                                        pos_weight=args.pos_weight, kernel_size=args.downsize)
+                                                                      pos_weight=args.pos_weight, kernel_size=args.downsize)
 
         # measure elapsed time
         torch.cuda.synchronize()
@@ -386,12 +538,19 @@ def validate(val_loader, model, epoch, val_writer, init_spixl_map_idx, xy_feat):
         val_writer.add_scalar('loss_sem', loss_sem.item(), epoch)
         val_writer.add_scalar('loss_pos', loss_pos.item(), epoch)
 
-        mean_values = torch.tensor([0.411, 0.432, 0.45], dtype=input_gpu.dtype).view(3, 1, 1)
-        input_l_save = (make_grid((input + mean_values).clamp(0, 1), nrow=args.batch_size))
-
+        mean_values = torch.tensor(
+            [0.411, 0.432, 0.45], dtype=input_gpu.dtype).view(3, 1, 1)
+        input_l_save = (
+            make_grid(
+                (input +
+                 mean_values).clamp(
+                    0,
+                    1),
+                nrow=args.batch_size))
 
         curr_spixl_map = update_spixl_map(init_spixl_map_idx, output)
-        spixel_lab_save = make_grid(curr_spixl_map, nrow=args.batch_size)[0, :, :]
+        spixel_lab_save = make_grid(
+            curr_spixl_map, nrow=args.batch_size)[0, :, :]
         spixel_viz, _ = get_spixel_image(input_l_save, spixel_lab_save)
 
         label_save = make_grid(args.label_factor * label)
@@ -407,14 +566,16 @@ def validate(val_loader, model, epoch, val_writer, init_spixl_map_idx, xy_feat):
 
         print('==> write val step %dth to tensorboard' % i)
 
-
     return total_loss.avg, losses_sem.avg
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.tar'):
-    torch.save(state, os.path.join(save_path,filename))
+    torch.save(state, os.path.join(save_path, filename))
     if is_best:
-        shutil.copyfile(os.path.join(save_path,filename), os.path.join(save_path,'model_best.tar'))
+        shutil.copyfile(
+            os.path.join(
+                save_path, filename), os.path.join(
+                save_path, 'model_best.tar'))
 
 
 if __name__ == '__main__':

@@ -280,10 +280,7 @@ def main():
     # ============== create model ====================
     if args.pretrained:
         network_data = torch.load(args.pretrained)
-        args.arch = network_data['arch']
-        if args.migration:
-            network_data['state_dict'] = model_util.migrate_state_dict(
-                network_data['state_dict'])
+        # args.arch = network_data['arch']
         print("=> using pre-trained model '{}'".format(args.arch))
     else:
         network_data = None
@@ -308,7 +305,8 @@ def main():
     # for continues training
     if args.pretrained and ('dataset' in network_data):
         if args.pretrained and args.dataset == network_data['dataset']:
-            optimizer.load_state_dict(network_data['optimizer'])
+            if args.arch == network_data['arch']:
+                optimizer.load_state_dict(network_data['optimizer'])
             best_EPE = network_data['best_EPE']
             args.start_epoch = network_data['epoch']
             save_path = os.path.dirname(args.pretrained)

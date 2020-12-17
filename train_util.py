@@ -6,7 +6,7 @@ import cv2
 
 import sys
 sys.path.append('./third_party/cython')
-# from connectivit import enforce_connectivity
+from connectivit import enforce_connectivity
 
 
 def init_spixel_grid(args, b_train=True):
@@ -417,7 +417,7 @@ def get_spixel_image(given_img, spix_index, n_spixels=600,
             given_img_np_.shape[0] * given_img_np_.shape[1]) / (int(n_spixels) * 1.0)
         min_size = int(0.06 * segment_size)
         max_size = int(3 * segment_size)
-        # spix_index_np = enforce_connectivity(spix_index_np[None, :, :], min_size, max_size)[0]
+        spix_index_np = enforce_connectivity(spix_index_np[None, :, :], min_size, max_size)[0]
     cur_max = np.max(given_img_np)
     spixel_bd_image = mark_boundaries(
         given_img_np /

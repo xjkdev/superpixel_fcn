@@ -55,7 +55,7 @@ class Down(nn.Module):
         self.batchNorm = batchNorm
         self.conv_a = conv(self.batchNorm, in_planes, out_planes, kernel_size,
                            stridea)
-        self.conv_b = conv(self.batchNorm, in_planes, out_planes, kernel_size,
+        self.conv_b = conv(self.batchNorm, out_planes, out_planes, kernel_size,
                            strideb)
         self.ca = ChannelAttention(out_planes)
         self.sa = SpatialAttention()
@@ -251,7 +251,11 @@ def SpixelNet1l_CBAM(data=None):
     # Model without  batch normalization
     model = SpixelNetCBAM(batchNorm=False)
     if data is not None:
-        model.load_state_dict(data['state_dict'])
+        if data['arch'] == 'SpixelNet1l':
+            print("use migration model")
+            model.load_state_dict(migrate_state_dict(data['state_dict']))
+        else:
+            model.load_state_dict(data['state_dict'])
     return model
 
 
@@ -259,6 +263,10 @@ def SpixelNet1l_CBAM_bn(data=None):
     # model with batch normalization
     model = SpixelNetCBAM(batchNorm=True)
     if data is not None:
-        model.load_state_dict(data['state_dict'])
+        if data['arch'] == 'SpixelNet1l_bn':
+            print("use migration model")
+            model.load_state_dict(migrate_state_dict(data['state_dict']))
+        else:
+            model.load_state_dict(data['state_dict'])
     return model
 #

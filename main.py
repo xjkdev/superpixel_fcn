@@ -191,11 +191,6 @@ parser.add_argument(
     default=None,
     help='path to pre-trained model')
 parser.add_argument(
-    '--migration',
-    dest='migration',
-    default=False,
-    help='is pretrained migration')
-parser.add_argument(
     '--no-date',
     action='store_true',
     help='don\'t append date timestamp to folder')
@@ -281,9 +276,7 @@ def main():
     if args.pretrained:
         network_data = torch.load(args.pretrained)
         args.arch = network_data['arch']
-        if args.migration:
-            network_data['state_dict'] = model_util.migrate_state_dict(
-                network_data['state_dict'])
+        network_data['state_dict'] = network_data['state_dict']
         print("=> using pre-trained model '{}'".format(args.arch))
     else:
         network_data = None

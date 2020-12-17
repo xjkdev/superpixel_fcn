@@ -1,4 +1,5 @@
 import torch.utils.data as data
+import os.path
 
 class ListDataset(data.Dataset):
     def __init__(self, root, dataset, path_list, transform=None, target_transform=None,
@@ -15,6 +16,7 @@ class ListDataset(data.Dataset):
 
     def __getitem__(self, index):
         img_path = self.img_path_list[index][:-1]
+        img_path = os.path.join(self.root, img_path)
         # We do not consider other datsets in this work
         assert self.dataset == 'bsd500'
         assert (self.transform is not None) and (self.target_transform is not None)

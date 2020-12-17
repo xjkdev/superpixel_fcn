@@ -31,12 +31,13 @@
 # Supposed to be run from within examples/.
 
 
-SUPERPIXELS=("54" "96" "150" "216" "294" "384" "486" "600" "726" "864" "1014" "1176" "1350" "1536" "1944") #
-IMG_PATH=/data/superpixel/BSD500_ori/images/test
-GT_PATH=/data/superpixel/BSD500_ori/test/map_csv
+# SUPERPIXELS=("54" "96" "150" "216" "294" "384" "486" "600" "726" "864" "1014" "1176" "1350" "1536" "1944") #
+SUPERPIXELS=("300" "432" "588" "768" "972" "1200" "1452" "1728" "2028" "2352") #
+IMG_PATH=/home/junkun/ssn_fcn/superpixel_fcn/nyu_test_set/img
+GT_PATH=/home/junkun/ssn_fcn/superpixel_fcn/nyu_test_set/label_csv
 
 for SUPERPIXEL in "${SUPERPIXELS[@]}"
 do
    echo $SUPERPIXEL
-       ../bin/eval_summary_cli /data/Spixel_module_cvpr20/test/test_multiscale_enforce_connect/SPixelNet_nSpixel_${SUPERPIXEL}/map_csv  $IMG_PATH $GT_PATH  
+       ../../superpixel-benchmark/bin/eval_summary_cli /home/junkun/ssn_fcn/superpixel_fcn/nyu_test_output_c/SPixelNet_nSpixel_${SUPERPIXEL}/map_csv  $IMG_PATH  $GT_PATH  
 done

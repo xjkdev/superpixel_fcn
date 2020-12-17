@@ -200,3 +200,8 @@ BSD500/
 dump/
 data_preprocessing/BSR_raw
 third_party/cython/connectivity.c
+nyu_test_output
+nyu_test_output_c
+nyu_test_set/img
+nyu_test_set/label_csv
+nyu_test_set/nyuv2_test_subset.txt

@@ -191,11 +191,6 @@ parser.add_argument(
     default=None,
     help='path to pre-trained model')
 parser.add_argument(
-    '--migration',
-    dest='migration',
-    default=False,
-    help='is pretrained migration')
-parser.add_argument(
     '--no-date',
     action='store_true',
     help='don\'t append date timestamp to folder')

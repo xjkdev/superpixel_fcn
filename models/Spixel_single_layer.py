@@ -253,7 +253,9 @@ def SpixelNet1l_CBAM(data=None):
     if data is not None:
         if data['arch'] == 'SpixelNet1l':
             print("use migration model")
-            model.load_state_dict(migrate_state_dict(data['state_dict']))
+            model_dict_ = model.state_dict()
+            model_dict_.update(migrate_state_dict(data['state_dict']))
+            model.load_state_dict(model_dict_)
         else:
             model.load_state_dict(data['state_dict'])
     return model
@@ -265,7 +267,9 @@ def SpixelNet1l_CBAM_bn(data=None):
     if data is not None:
         if data['arch'] == 'SpixelNet1l_bn':
             print("use migration model")
-            model.load_state_dict(migrate_state_dict(data['state_dict']))
+            model_dict_ = model.state_dict()
+            model_dict_.update(migrate_state_dict(data['state_dict']))
+            model.load_state_dict(model_dict_)
         else:
             model.load_state_dict(data['state_dict'])
     return model

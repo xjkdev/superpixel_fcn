@@ -15,10 +15,10 @@ class ListDataset(data.Dataset):
         self.datatype = datatype
 
     def __getitem__(self, index):
-        img_path = self.img_path_list[index][:-1]
+        img_path = self.img_path_list[index].rstrip()
         img_path = os.path.join(self.root, img_path)
         # We do not consider other datsets in this work
-        assert self.dataset == 'bsd500'
+        assert self.dataset == 'bsd500' or self.dataset=='cityscapes' or self.dataset=='CITYSCAPES'
         assert (self.transform is not None) and (self.target_transform is not None)
 
         inputs, label = self.loader(img_path, img_path.replace('_img.jpg', '_label.png'))
